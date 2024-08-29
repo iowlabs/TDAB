@@ -397,16 +397,18 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.lineEdit_2.setText(current_time)
 
 	def updateData(self):
-		self.graphicsCh[0].clear()
-		x = np.linspace(0, 1000, 1000, endpoint = False)
-		#pen = pg.mkPen(color = (0, 0, 255),width = 2)
-		self.graphicsCh[0].plot(x, self.collections[0], pen = pg.mkPen(color = (0, 0, 255),width = 2))
-		self.graphicsCh[0].plot(x, self.collections[1], pen = pg.mkPen(color = (255, 0, 0),width = 2))
-		self.graphicsCh[0].plot(x, self.collections[2], pen = pg.mkPen(color = (0, 255, 0),width = 2))
-		self.graphicsCh[0].plot(x, self.collections[3], pen = pg.mkPen(color = (0, 255, 255),width = 2))
-		self.graphicsCh[0].plot(x, self.collections[4], pen = pg.mkPen(color = (255, 0, 255),width = 2))
-		self.graphicsCh[0].plot(x, self.collections[5], pen = pg.mkPen(color = (255, 255, 0),width = 2))
-
+		try:
+			if self.controller.data_ready:
+				self.graphicsCh[0].clear()
+				x = np.linspace(0, 1000, 1000, endpoint = False)
+				#pen = pg.mkPen(color = (0, 0, 255),width = 2)
+				self.graphicsCh[0].plot(x, self.collections[0], pen = pg.mkPen(color = (0, 0, 255),width = 2))
+				self.graphicsCh[0].plot(x, self.collections[1], pen = pg.mkPen(color = (255, 0, 0),width = 2))
+				self.graphicsCh[0].plot(x, self.collections[2], pen = pg.mkPen(color = (0, 255, 0),width = 2))
+				self.graphicsCh[0].plot(x, self.collections[3], pen = pg.mkPen(color = (0, 255, 255),width = 2))
+				self.graphicsCh[0].plot(x, self.collections[4], pen = pg.mkPen(color = (255, 0, 255),width = 2))
+				self.graphicsCh[0].plot(x, self.collections[5], pen = pg.mkPen(color = (255, 255, 0),width = 2))
+				self.controller.data_ready = False
 
 	def setParameters(self , _ch):
 		if self.enable_ch[_ch]:
