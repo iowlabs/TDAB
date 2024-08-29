@@ -1,0 +1,42 @@
+* C:\users\wac\My Documents\repo\iowlabs\EEG\hardware\simulations\EEG_complete_tran.asc
+V1 Vdd 0 5
+V2 0 vss 5
+V3 V_in+ Vocm_2 SINE(0 25m 100 0 0 -90)
+XU1 N012 N014 Vdd vss N014 LT1001
+XU2 0 NC_01 Vdd Vocm N003 N015 vss NC_02 N014 AD8475
+R1 N011 N010 10k
+R2 N012 N011 10k
+C1 N012 0 0.001µ
+C2 N014 N011 0.001µ
+XU3 N001 N002 N004 N009 Vss 0 N005 Vdd AD8421
+R4 N002 N004 1.1k
+R5 N001 V_in- 4.7k
+R6 N009 V_in+ 4.7k
+R7 0 V_in+ 10Meg
+R8 V_in- 0 10Meg
+C3 N001 N009 1n
+C4 0 N001 100p
+C5 N009 0 100p
+R9 N003 N015 10K
+V5 Vocm 0 0
+V6 Vocm_2 V_in- SINE(0 25m 100 0 0 -90)
+V8 0 Vin2 40m
+XU6 N007 N008 Vdd vss N008 LT1001
+R11 N008 N006 51k
+R12 0 N007 51k
+C7 N007 N006 100µ
+C8 N006 N005 100µ
+XU7 N008 N013 Vdd vss N010 LT1001
+R3 0 N013 1k
+R10 N010 N013 1k
+V4 Vocm_2 0 SINE(0 5m 1)
+.tran 0 0.5 0 0.01
+* Frecuencia de corte inferior 0.05
+* Para señales de micro usar R4 10
+* Para señales de milis usar R4 1.1K
+* Frecuencia de corte superior 10k
+.lib C:\users\wac\My Documents\repo\iowlabs\EEG\hardware\simulations\AD8421.cir
+.lib C:\users\wac\My Documents\repo\iowlabs\EEG\hardware\simulations\ad8475.cir
+.lib LTC.lib
+.backanno
+.end

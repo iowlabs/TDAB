@@ -1,0 +1,35 @@
+Version 4
+SymbolType BLOCK
+RECTANGLE Normal -239 -80 48 96
+WINDOW 0 -192 -91 Bottom 2
+WINDOW 3 -184 106 Top 2
+SYMATTR Prefix X
+SYMATTR Value AD8475
+SYMATTR ModelFile C:\users\wac\My Documents\repo\iowlabs\EEG\hardware\simulations\ad8475.cir
+PIN -240 48 LEFT 8
+PINATTR PinName -IN0.8X
+PINATTR SpiceOrder 1
+PIN -240 80 LEFT 8
+PINATTR PinName -IN0.4X
+PINATTR SpiceOrder 2
+PIN -96 -80 VRIGHT 8
+PINATTR PinName +VS
+PINATTR SpiceOrder 3
+PIN -240 -64 LEFT 8
+PINATTR PinName VOCM
+PINATTR SpiceOrder 4
+PIN 48 -32 RIGHT 8
+PINATTR PinName +OUT
+PINATTR SpiceOrder 5
+PIN 48 32 RIGHT 8
+PINATTR PinName -OUT
+PINATTR SpiceOrder 6
+PIN -96 96 VLEFT 8
+PINATTR PinName -VS
+PINATTR SpiceOrder 7
+PIN -240 -16 LEFT 8
+PINATTR PinName +IN0.4X
+PINATTR SpiceOrder 8
+PIN -240 16 LEFT 8
+PINATTR PinName +IN0.8X
+PINATTR SpiceOrder 9
