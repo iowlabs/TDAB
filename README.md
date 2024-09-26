@@ -9,16 +9,20 @@ Each channel can configure the gain as the cut-off frequencies of a band-pass fi
 
 ## LICENSES
 
-------------
+
 | Item     | License 	|
+|----------|------------|
 | Hardware | CERN-OHL-S-2.0 |
 | Software | GPL-3.0-or-later|
+| Firmware | GPL-3.0-or-later|
+| Documentation | CC-BY-SA-4.0|
 
-------------
+
+
 
 ## Hardware description
 
-![pcb of TDAB ](https://github.com/iowlabs/TDAB/tree/main/electronics/EEG_board/EEG_board/output_files/tdab.png)
+![pcb of TDAB ](https://github.com/iowlabs/TDAB/blob/main/electronics/EEG_board/EEG_board/output_files/tdab.png)
 
 ## Electrónics
 
