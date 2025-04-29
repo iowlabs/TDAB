@@ -488,7 +488,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "",
+      "plot": "output_files/TDAB_FabFiles/",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "output_files/EEG_board.step",

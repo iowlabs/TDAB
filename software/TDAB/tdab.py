@@ -47,6 +47,15 @@ class tdab:
 		self.ch4_v 	= collections.deque([0.0],1000)
 		self.ch5_v  = collections.deque([0.0],1000)
 		self.ch6_v  = collections.deque([0.0],1000)
+		self.acc_x  = collections.deque([0.0],1000)
+		self.acc_y  = collections.deque([0.0],1000)
+		self.acc_z  = collections.deque([0.0],1000)
+		self.w_x  = collections.deque([0.0],1000)
+		self.w_y  = collections.deque([0.0],1000)
+		self.w_z  = collections.deque([0.0],1000)
+		self.giro_x  = collections.deque([0.0],1000)
+		self.giro_y  = collections.deque([0.0],1000)
+		self.giro_z  = collections.deque([0.0],1000)
 		self.save = False
 		self.file_name = "test"+".csv"
 		self.data_file = None

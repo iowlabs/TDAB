@@ -51,6 +51,45 @@ MODO_AUTO   = 1
 RUNNING = 1
 STOPPED = 0
 
+
+class SerialReader(QThread):
+    data_received = pyqtSignal(list)  # Señal para enviar datos a la GUI
+
+    def __init__(self, port, baudrate=115200):
+        super().__init__()
+        self.port = port
+        self.baudrate = baudrate
+        self.running = True  # Para detener el hilo correctamente
+
+    def run(self):
+        try:
+            with serial.Serial(self.port, self.baudrate, timeout=1) as ser, open("datos.csv", "w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(["T", "Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6"])  # Encabezados del CSV
+
+                start_time = time.time()  # Marca de tiempo inicial
+
+                while self.running:
+                    line = ser.readline().decode('utf-8').strip()
+                    if line:
+                        try:
+                            data = list(map(int, line.split(",")))  # Convertir datos a enteros
+                            timestamp = round(time.time() - start_time, 3)  # Tiempo relativo
+                            data.insert(0, timestamp)  # Agregar el tiempo al inicio
+                            writer.writerow(data)  # Guardar en CSV
+                            self.data_received.emit(data)  # Enviar a la GUI
+                        except ValueError:
+                            print(f"Error al parsear: {line}")  # En caso de datos corruptos
+
+        except serial.SerialException as e:
+            print(f"Error con el puerto serial: {e}")
+
+    def stop(self):
+        self.running = False
+        self.quit()
+        self.wait()
+
+
 class MainWindow(QtWidgets.QMainWindow):
 	def __init__(self):
 		super(MainWindow,self).__init__()
@@ -63,12 +102,16 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.sample_time = 1
 		self.time_v = np.linspace(0, 1000, 1000, endpoint = False)
 		pen = pg.mkPen(color = (0, 0, 255),width = 2)
+
 		self.collections 	= [	self.controller.ch1_v,
 								self.controller.ch2_v,
 								self.controller.ch3_v,
 								self.controller.ch4_v,
 								self.controller.ch5_v,
 								self.controller.ch6_v]
+		self.collectionsAcc = [ self.controller.acc_x,
+								self.controller.acc_y,
+								self.controller.acc_z]
 
 		#self.collectionsAcc = [self.acc1_v,self.acc2_v]
 		self.graphicsCh =  [self.ui.graphicsView_9]
@@ -80,7 +123,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 			styles = {"color": "#f00", "font-size": "10px"}
 			#self.graphicsCh[i].setLabel("left", self.plot_labels[i], **styles)
-			#self.graphicsCh[i].setLabel("bottom", "tiempo (s)", **styles)
+			self.graphicsCh[i].setLabel("bottom", "tiempo (s)", **styles)
 			self.graphicsCh[i].showGrid(x=True, y=True)
 
 			#Set Range
@@ -88,19 +131,19 @@ class MainWindow(QtWidgets.QMainWindow):
 			self.graphicsCh[i].setYRange(-0.05, 1.05, padding=0)
 			self.graphicsCh[i].plot([0], self.collections[i], pen=pen)
 
-		#for i in range(2):
-		#	self.graphicsAcc[i].setBackground('w')
-		#	#self.graphicsCh[i].setTitle(self.plot_titles[i],color = "b",size = "15pt")
-		#
-		#	styles = {"color": "#f00", "font-size": "10px"}
-		#	#self.graphicsCh[i].setLabel("left", self.plot_labels[i], **styles)
-		#	self.graphicsAcc[i].setLabel("bottom", "tiempo (s)", **styles)
-		#	self.graphicsAcc[i].showGrid(x=True, y=True)
 
-		#	#Set Range
-		#	self.graphicsAcc[i].setXRange(-0.05, 1.05, padding=0)
-		#	self.graphicsAcc[i].setYRange(-0.05, 1.05, padding=0)
-		#	self.graphicsAcc[i].plot(self.time_v, self.collectionsAcc[i], pen=pen)
+		self.ui.graphicsView_10.setBackground('w')
+		#self.ui.graphicsView_10.setTitle("accel",color = "b",size = "15pt")
+
+		styles = {"color": "#f00", "font-size": "10px"}
+		#self.graphicsCh[i].setLabel("left", self.plot_labels[i], **styles)
+		self.ui.graphicsView_10.setLabel("bottom", "tiempo (s)", **styles)
+		self.ui.graphicsView_10.showGrid(x=True, y=True)
+
+		#Set Range
+		self.ui.graphicsView_10.setXRange(-0.05, 1.05, padding=0)
+		self.ui.graphicsView_10.setYRange(-0.05, 1.05, padding=0)
+		self.ui.graphicsView_10.plot([0], self.collectionsAcc[0], pen=pen)
 
 
 		self.time_now   = ""
@@ -122,6 +165,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
 		self.mode_ch = [ 0, 0, 0, 0, 0, 0] # 0 test; 1 impedance
 		self.test_mode_ch = ['EEG','EEG','EEG','EEG','EEG','EEG']
+
 		"""-----------------------
    			INITIAL DISABLED
 		----------------------"""
@@ -167,13 +211,13 @@ class MainWindow(QtWidgets.QMainWindow):
 							self.ui.pushButton_17,
 							self.ui.pushButton_18]
 
-		self.sound_btns = [	self.ui.pushButton_14,
+		self.sound_btn = [	self.ui.pushButton_14,
 							self.ui.pushButton_13,
 							self.ui.pushButton_12,
 							self.ui.pushButton_11,
 							self.ui.pushButton_10,
 							self.ui.pushButton_15]
-
+		"""
 		self.bfc_text = [	self.ui.label_36,
 							self.ui.label_48,
 							self.ui.label_45,
@@ -194,7 +238,7 @@ class MainWindow(QtWidgets.QMainWindow):
 							self.ui.label_42,
 							self.ui.label_33,
 							self.ui.label_53]
-
+		"""
 		self.bfc_lines = [	self.ui.lineEdit_26,
 							self.ui.lineEdit_35,
 							self.ui.lineEdit_32,
@@ -218,21 +262,28 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 		for i in range(6):
-			self.sound_btns[i].setDisabled(True)
+			self.sound_btn[i].setDisabled(True)
 			self.impedancia_btn[i].setDisabled(True)
 			self.test_btn[i].setDisabled(True)
 			self.cb_test[i].setDisabled(True)
 			self.set_btns[i].setDisabled(True)
-			self.sound_btns[i].setDisabled(True)
-			self.bfc_text[i].setDisabled(True)
-			self.tfc_text[i].setDisabled(True)
-			self.gain_text[i].setDisabled(True)
+			#self.bfc_text[i].setDisabled(True)
+			#self.tfc_text[i].setDisabled(True)
+			#self.gain_text[i].setDisabled(True)
 			self.bfc_lines[i].setDisabled(True)
 			self.tfc_lines[i].setDisabled(True)
 			self.gain_lines[i].setDisabled(True)
 
 		self.ui.pushButton_8.setDisabled(False)
 		self.ui.pushButton_9.setDisabled(True)
+		self.ui.pushButton_35.setDisabled(True)
+		self.ui.pushButton_32.setDisabled(True)
+		self.ui.pushButton_33.setDisabled(True)
+		self.ui.pushButton_34.setDisabled(True)
+		self.ui.comboBox_14.setDisabled(True)
+		self.ui.lineEdit_41.setDisabled(True)
+		self.ui.lineEdit_42.setDisabled(True)
+		self.ui.lineEdit_43.setDisabled(True)
 
 
 		"""--------------------------
@@ -246,6 +297,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.enchannels_checks[3].stateChanged.connect(lambda:self.enableChannel(3))
 		self.enchannels_checks[4].stateChanged.connect(lambda:self.enableChannel(4))
 		self.enchannels_checks[5].stateChanged.connect(lambda:self.enableChannel(5))
+		self.ui.checkBox_12.stateChanged.connect(lambda:self.enableAltChannel(6))
+		self.ui.checkBox_15.stateChanged.connect(lambda:self.enableAltChannel(7))
+		self.ui.checkBox_17.stateChanged.connect(self.enableAllChannel)
+
 
 		#SET IMPEDANCE MODE
 		self.impedancia_btn[0].clicked.connect(lambda:self.impedanceMode(0))
@@ -254,6 +309,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.impedancia_btn[3].clicked.connect(lambda:self.impedanceMode(3))
 		self.impedancia_btn[4].clicked.connect(lambda:self.impedanceMode(4))
 		self.impedancia_btn[5].clicked.connect(lambda:self.impedanceMode(5))
+		self.ui.pushButton_32.clicked.connect(self.impedanceMasterMode)
 
 		#SET TEST MODE
 		self.test_btn[0].clicked.connect(lambda:self.testMode(0))
@@ -262,6 +318,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.test_btn[3].clicked.connect(lambda:self.testMode(3))
 		self.test_btn[4].clicked.connect(lambda:self.testMode(4))
 		self.test_btn[5].clicked.connect(lambda:self.testMode(5))
+		self.ui.pushButton_33.clicked.connect(self.testMasterMode)
 
 		#SELECT TEST TYPE
 		self.cb_test[0].currentIndexChanged.connect(lambda:self.changeType(0))
@@ -270,6 +327,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.cb_test[3].currentIndexChanged.connect(lambda:self.changeType(3))
 		self.cb_test[4].currentIndexChanged.connect(lambda:self.changeType(4))
 		self.cb_test[5].currentIndexChanged.connect(lambda:self.changeType(5))
+		self.ui.comboBox_14.currentIndexChanged.connect(self.changeMasterType)
 
 		#RUN TEST
 		self.ui.pushButton_8.clicked.connect(self.startTest)
@@ -279,12 +337,12 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.pushButton_7.clicked.connect(self.changeDir)
 
 		#PLAY SOUND
-		self.sound_btns[0].clicked.connect(lambda:self.playChannel(0))
-		self.sound_btns[1].clicked.connect(lambda:self.playChannel(1))
-		self.sound_btns[2].clicked.connect(lambda:self.playChannel(2))
-		self.sound_btns[3].clicked.connect(lambda:self.playChannel(3))
-		self.sound_btns[4].clicked.connect(lambda:self.playChannel(4))
-		self.sound_btns[5].clicked.connect(lambda:self.playChannel(5))
+		self.sound_btn[0].clicked.connect(lambda:self.playChannel(0))
+		self.sound_btn[1].clicked.connect(lambda:self.playChannel(1))
+		self.sound_btn[2].clicked.connect(lambda:self.playChannel(2))
+		self.sound_btn[3].clicked.connect(lambda:self.playChannel(3))
+		self.sound_btn[4].clicked.connect(lambda:self.playChannel(4))
+		self.sound_btn[5].clicked.connect(lambda:self.playChannel(5))
 
 		#SET PARAMETERS
 		self.set_btns[0].clicked.connect(lambda:self.setParameters(0))
@@ -299,6 +357,9 @@ class MainWindow(QtWidgets.QMainWindow):
 			self.bfc_lines[i].setText(str(self.bfc[i]))
 			self.tfc_lines[i].setText(str(self.tfc[i]))
 			self.gain_lines[i].setText(str(self.gain[i]))
+		self.ui.lineEdit_41.setText(str(EEG_BFC))
+		self.ui.lineEdit_42.setText(str(EEG_TFC))
+		self.ui.lineEdit_43.setText(str(EEG_GAIN))
 
 
 		#TIME
@@ -309,57 +370,155 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.clock_timer.timeout.connect(self.updateTime)
 		self.clock_timer.start()
 
-		#MGMT NEW DATA
-		self.run_timer = QtCore.QTimer()
-		self.run_timer.setInterval(1000*self.sample_time)
-		self.run_timer.timeout.connect(self.updateData)
+		##MGMT NEW DATA
+		#self.run_timer = QtCore.QTimer()
+		#self.run_timer.setInterval(1000*self.sample_time)
+		#self.run_timer.timeout.connect(self.updateData)
+
+
+		# Inicializar el hilo de lectura
+        self.serial_thread = SerialReader(port)
+        self.serial_thread.data_received.connect(self.update_plot)
+        self.serial_thread.start()
 
 
 	def enableChannel(self, _ch):
 		if self.enchannels_checks[_ch].isChecked():
 			print("canal {} habilitado".format(_ch+1))
 			self.enable_ch[_ch] = 1
-			self.sound_btns[_ch].setDisabled(False)
-			if self.mode_ch[_ch]:
+			self.sound_btn[_ch].setDisabled(False)
+			if self.mode_ch[_ch] == 0: #test mode
+				print("test mode")
+				self.impedancia_btn[_ch].setDisabled(False)
+				self.sound_btn[_ch].setDisabled(False)
+				self.test_btn[_ch].setDisabled(True)
+			elif self.mode_ch[_ch] == 1: #impedance mode
+				print("impedance mode")
 				self.impedancia_btn[_ch].setDisabled(True)
 				self.test_btn[_ch].setDisabled(False)
-			else:
+				self.sound_btn[_ch].setDisabled(False)
+			else:	# sound mode
 				self.impedancia_btn[_ch].setDisabled(False)
-				self.test_btn[_ch].setDisabled(True)
+				self.test_btn[_ch].setDisabled(False)
+				self.sound_btn[_ch].setDisabled(True)
 			self.cb_test[_ch].setDisabled(False)
 			self.set_btns[_ch].setDisabled(False)
-			self.sound_btns[_ch].setDisabled(False)
-			self.bfc_text[_ch].setDisabled(False)
-			self.tfc_text[_ch].setDisabled(False)
-			self.gain_text[_ch].setDisabled(False)
+			self.sound_btn[_ch].setDisabled(False)
+			#self.bfc_text[_ch].setDisabled(False)
+			#self.tfc_text[_ch].setDisabled(False)
+			#self.gain_text[_ch].setDisabled(False)
 			self.bfc_lines[_ch].setDisabled(False)
 			self.tfc_lines[_ch].setDisabled(False)
 			self.gain_lines[_ch].setDisabled(False)
 		else:
 			print("canal {} deshabilitado".format(_ch))
 			self.enable_ch[_ch] = 0
-			self.sound_btns[_ch].setDisabled(True)
 			self.impedancia_btn[_ch].setDisabled(True)
 			self.test_btn[_ch].setDisabled(True)
 			self.cb_test[_ch].setDisabled(True)
 			self.set_btns[_ch].setDisabled(True)
-			self.sound_btns[_ch].setDisabled(True)
-			self.bfc_text[_ch].setDisabled(True)
-			self.tfc_text[_ch].setDisabled(True)
-			self.gain_text[_ch].setDisabled(True)
+			self.sound_btn[_ch].setDisabled(True)
+			#self.bfc_text[_ch].setDisabled(True)
+			#self.tfc_text[_ch].setDisabled(True)
+			#self.gain_text[_ch].setDisabled(True)
 			self.bfc_lines[_ch].setDisabled(True)
 			self.tfc_lines[_ch].setDisabled(True)
 			self.gain_lines[_ch].setDisabled(True)
+
+	def enableAltChannel(self,_ch):
+		pass
+
+	def enableAllChannel(self):
+		if self.ui.checkBox_17.isChecked():
+			self.ui.pushButton_35.setDisabled(False)
+			self.ui.pushButton_32.setDisabled(False)
+			self.ui.pushButton_33.setDisabled(True)
+			self.ui.pushButton_34.setDisabled(False)
+			self.ui.comboBox_14.setDisabled(False)
+			self.ui.lineEdit_41.setDisabled(False)
+			self.ui.lineEdit_42.setDisabled(False)
+			self.ui.lineEdit_43.setDisabled(False)
+
+			for _ch in range(6):
+				print("canal {} habilitado".format(_ch+1))
+				self.enchannels_checks[_ch].setChecked(True)
+				self.enable_ch[_ch] = 1
+				self.sound_btn[_ch].setDisabled(False)
+				if self.mode_ch[_ch] == 0:
+					self.impedancia_btn[_ch].setDisabled(False)
+					self.sound_btn[_ch].setDisabled(False)
+					self.test_btn[_ch].setDisabled(True)
+				elif self.mode_ch[_ch] == 1:
+					self.impedancia_btn[_ch].setDisabled(True)
+					self.test_btn[_ch].setDisabled(False)
+					self.sound_btn[_ch].setDisabled(False)
+				else:
+					self.impedancia_btn[_ch].setDisabled(False)
+					self.test_btn[_ch].setDisabled(False)
+					self.sound_btn[_ch].setDisabled(True)
+				self.cb_test[_ch].setDisabled(False)
+				self.set_btns[_ch].setDisabled(False)
+				#self.bfc_text[_ch].setDisabled(False)
+				#self.tfc_text[_ch].setDisabled(False)
+				#self.gain_text[_ch].setDisabled(False)
+				self.bfc_lines[_ch].setDisabled(False)
+				self.tfc_lines[_ch].setDisabled(False)
+				self.gain_lines[_ch].setDisabled(False)
+		else:
+			self.ui.pushButton_35.setDisabled(True)
+			self.ui.pushButton_32.setDisabled(True)
+			self.ui.pushButton_33.setDisabled(True)
+			self.ui.pushButton_34.setDisabled(True)
+			self.ui.comboBox_14.setDisabled(True)
+			self.ui.lineEdit_41.setDisabled(True)
+			self.ui.lineEdit_42.setDisabled(True)
+			self.ui.lineEdit_43.setDisabled(True)
+
+			for _ch in range(6):
+				print("canal {} deshabilitado".format(_ch))
+				self.enable_ch[_ch] = 0
+				self.enchannels_checks[_ch].setChecked(False)
+				self.impedancia_btn[_ch].setDisabled(True)
+				self.test_btn[_ch].setDisabled(True)
+				self.cb_test[_ch].setDisabled(True)
+				self.set_btns[_ch].setDisabled(True)
+				self.sound_btn[_ch].setDisabled(True)
+				#self.bfc_text[_ch].setDisabled(True)
+				#self.tfc_text[_ch].setDisabled(True)
+				#self.gain_text[_ch].setDisabled(True)
+				self.bfc_lines[_ch].setDisabled(True)
+				self.tfc_lines[_ch].setDisabled(True)
+				self.gain_lines[_ch].setDisabled(True)
 
 	def impedanceMode(self,_ch ):
 		self.mode_ch[_ch] = 1
 		self.impedancia_btn[_ch].setDisabled(True)
 		self.test_btn[_ch].setDisabled(False)
+		self.sound_btn[_ch].setDisabled(False)
+
+	def impedanceMasterMode(self):
+		self.ui.pushButton_33.setDisabled(False)
+		self.ui.pushButton_32.setDisabled(True)
+		for i in range(6):
+			self.impedanceMode(i)
 
 	def testMode(self,_ch ):
 		self.mode_ch[_ch] = 0
 		self.impedancia_btn[_ch].setDisabled(False)
 		self.test_btn[_ch].setDisabled(True)
+		self.sound_btn[_ch].setDisabled(False)
+
+	def testMasterMode(self):
+		self.ui.pushButton_33.setDisabled(True)
+		self.ui.pushButton_32.setDisabled(False)
+		for i in range(6):
+			self.testMode(i)
+
+	def soundMode(self,_ch ):
+		self.mode_ch[_ch] = 2
+		self.impedancia_btn[_ch].setDisabled(False)
+		self.test_btn[_ch].setDisabled(False)
+		self.sound_btn[_ch].setDisabled(False)
 
 	def changeType(self,_ch):
 		mode = self.cb_test[_ch].currentText()
@@ -388,6 +547,34 @@ class MainWindow(QtWidgets.QMainWindow):
 
 		self.test_mode_ch[_ch] = mode
 
+	def changeMasterType(self):
+		mode  = self.ui.comboBox_14.currentText()
+		if mode == "EEG":
+			self.ui.lineEdit_41.setText(str(EEG_BFC))
+			self.ui.lineEdit_42.setText(str(EEG_TFC))
+			self.ui.lineEdit_43.setText(str(EEG_GAIN))
+			for i in range(6):
+				self.cb_test[i].setCurrentText("EEG")
+				self.changeType(i)
+		elif mode == "EMG":
+			self.ui.lineEdit_41.setText(str(EMG_BFC))
+			self.ui.lineEdit_42.setText(str(EMG_TFC))
+			self.ui.lineEdit_43.setText(str(EMG_GAIN))
+			for i in range(6):
+				self.cb_test[i].setCurrentText("EMG")
+				self.changeType(i)
+		elif mode == "ECG":
+			self.ui.lineEdit_41.setText(str(ECG_BFC))
+			self.ui.lineEdit_42.setText(str(ECG_TFC))
+			self.ui.lineEdit_43.setText(str(ECG_GAIN))
+			for i in range(6):
+				self.cb_test[i].setCurrentText("ECG")
+				self.changeType(i)
+		elif mode == "Manual":
+			for i in range(6):
+				self.cb_test[i].setCurrentText("Manual")
+				self.changeType(i)
+
 	def updateTime(self):
 		if self.state == RUNNING:
 			self.elapsed_time += 1
@@ -409,6 +596,8 @@ class MainWindow(QtWidgets.QMainWindow):
 				self.graphicsCh[0].plot(x, self.collections[4], pen = pg.mkPen(color = (255, 0, 255),width = 2))
 				self.graphicsCh[0].plot(x, self.collections[5], pen = pg.mkPen(color = (255, 255, 0),width = 2))
 				self.controller.data_ready = False
+		except Exception as e:
+			print(e)
 
 	def setParameters(self , _ch):
 		if self.enable_ch[_ch]:
