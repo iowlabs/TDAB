@@ -9,8 +9,8 @@ import datetime
 import csv
 
 # Configuración del puerto serial
-SERIAL_PORT = '/dev/ttyUSB0'  # Cambia esto al puerto adecuado (e.g., '/dev/ttyUSB0' en Linux)
-BAUD_RATE = 115200
+SERIAL_PORT = '/dev/ttyACM0'  # Cambia esto al puerto adecuado (e.g., '/dev/ttyUSB0' en Linux)
+BAUD_RATE = 500000
 TIMEOUT = 1
 PATH 	= '/data/'
 
@@ -20,9 +20,9 @@ MAX_LEN = 1000  # Ajusta según tus necesidades
 
 # Buffers circulares para almacenar los datos
 tiempo_buffer = deque(maxlen=MAX_LEN)
-temp_buffer = deque(maxlen=MAX_LEN)
-pwm_buffer = deque(maxlen=MAX_LEN)
-sp_buffer =  deque(maxlen=MAX_LEN)
+x_buffer = deque(maxlen=MAX_LEN)
+y_buffer = deque(maxlen=MAX_LEN)
+z_buffer =  deque(maxlen=MAX_LEN)
 
 # Variable para controlar el hilo de lectura
 running = True
@@ -52,9 +52,9 @@ def serial_reader():
 						data = json.loads(line)
 						print(data)
 						t = data['time']
-						x = data['x']
-						y = data['y']
-						z = data['z']
+						x = data['acc']['x']
+						y = data['acc']['y']
+						z = data['acc']['z']
 
 						tiempo_buffer.append(t)
 						x_buffer.append(x)

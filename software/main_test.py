@@ -4,20 +4,21 @@ import csv
 import time
 import numpy as np
 import pandas as pd
+import json
 import collections
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog, QVBoxLayout, QWidget
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 import pyqtgraph as pg
 
 
-max_buff = 1000
+max_buff = 10000
 
 
 class SerialReader(QThread):
 	data_received = pyqtSignal(list)  # Señal para enviar datos a la GUI
 	finished = pyqtSignal()
 
-	def __init__(self, port, baudrate=500000,sampling_rate = 1000):
+	def __init__(self, port, baudrate=115200,sampling_rate = 1000):
 		super().__init__()
 		self.port = port
 		self.baudrate = baudrate
@@ -26,7 +27,7 @@ class SerialReader(QThread):
 
 	def run(self):
 		try:
-			with serial.Serial(self.port, self.baudrate, timeout=0) as ser, open("datos.csv", "w", newline="") as file:
+			with serial.Serial(self.port, self.baudrate, timeout=0.001) as ser, open("datos.csv", "w", newline="") as file:
 				writer = csv.writer(file)
 				writer.writerow(["T", "Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6"])  # Encabezados del CSV
 
@@ -37,6 +38,33 @@ class SerialReader(QThread):
 				while self.running:
 					line = ser.readline().decode('utf-8').strip()
 					if line:
+						try:
+							data = json.loads(line)
+							print(data)
+							t = data['time']
+
+							x = data['acc']['x']
+							y = data['acc']['y']
+							z = data['acc']['z']
+							wx = data['gyro']['x']
+							wy = data['gyro']['y']
+							wz = data['gyro']['z']
+							if not hasattr(self, 'last_t'):
+								self.last_t = t
+							else:
+								dt = t - self.last_t
+								self.last_t = t
+								print(f"delta t : {dt}")
+
+							self.data_received.emit([t,x,y,z,wx,wy,wz])  # Enviar a la GUI
+							#tiempo_buffer.append(t)
+							#x_buffer.append(x)
+							#y_buffer.append(y)
+							#z_buffer.append(z)
+							#saveData(t,temp,temp_sp,pwm,rpm)
+						except (json.JSONDecodeError, KeyError) as e:
+							print(f"Error al procesar la línea: {line} | Error: {e}")
+						"""
 						try:
 							data = list(map(int, line.split(",")))  # Convertir datos a enteros
 							#timestamp = round(time.time() - start_time, 3)  # Tiempo relativo
@@ -49,7 +77,7 @@ class SerialReader(QThread):
 							self.data_received.emit(data)  # Enviar a la GUI
 						except ValueError:
 							print(f"Error al parsear: {line}")  # En caso de datos corruptos
-
+						"""
 		except serial.SerialException as e:
 			print(f"Error con el puerto serial: {e}")
 
@@ -67,6 +95,9 @@ class GraphWindow(QMainWindow):
 		self.setWindowTitle("Visualizador de Datos en Tiempo Real")
 		self.setGeometry(100, 100, 900, 600)
 
+		self.sample_counter = 0
+		self.sampling_rate = 1000
+
 		# Layout principal
 		layout = QVBoxLayout()
 		self.main_widget = QWidget()
@@ -74,20 +105,41 @@ class GraphWindow(QMainWindow):
 		self.main_widget.setLayout(layout)
 
 		# Crear el gráfico con pyqtgraph
-		self.plot_widget = pg.PlotWidget()
-		layout.addWidget(self.plot_widget)
-		self.plot_widget.setLabel("left", "Valor")
-		self.plot_widget.setLabel("bottom", "Tiempo (s)")
-		self.plot_widget.addLegend()
-		self.plot_widget.setDownsampling(mode='peak')
+		#self.plot_widget = pg.PlotWidget()
+		#layout.addWidget(self.plot_widget)
+		# Crear dos widgets de gráfico
+		self.acc_plot_widget = pg.PlotWidget(title="Acelerómetro")
+		self.gyro_plot_widget = pg.PlotWidget(title="Giroscopio")
+
+
+		layout.addWidget(self.acc_plot_widget)
+		layout.addWidget(self.gyro_plot_widget)
+
+		# Configuración visual
+		for pw in [self.acc_plot_widget, self.gyro_plot_widget]:
+			pw.setLabel("left", "Valor")
+			pw.setLabel("bottom", "Tiempo (s)")
+			pw.addLegend()
+			pw.showGrid(x=True, y=True, alpha=0.3)
+			#pw.setDownsampling(mode='peak')
+			pw.setMouseEnabled(x=True, y=True)
+			pw.getViewBox().setMouseMode(pg.ViewBox.RectMode)
+
+		#self.plot_widget.setLabel("left", "Valor")
+		#self.plot_widget.setLabel("bottom", "Tiempo (s)")
+		#self.plot_widget.addLegend()
+		#self.plot_widget.setDownsampling(mode='peak')
 
  		# Activar interactividad (zoom y pan)
-		self.plot_widget.setMouseEnabled(x=True, y=True)  # Permitir zoom con la rueda del mouse
-		self.plot_widget.getViewBox().setMouseMode(pg.ViewBox.RectMode)  # Habilitar modo de zoom rectangular
+		#self.plot_widget.setMouseEnabled(x=True, y=True)  # Permitir zoom con la rueda del mouse
+		#self.plot_widget.getViewBox().setMouseMode(pg.ViewBox.RectMode)  # Habilitar modo de zoom rectangular
 
 
 		# Configuración de curvas (6 canales)
-		self.curves = []
+		#self.curves = []
+		self.acc_curves = []
+		self.gyro_curves = []
+
 		#self.data_buffer = {i: np.zeros(10000) for i in range(6)}  # Buffer de 10s
 		self.time_buffer = collections.deque([0],max_buff)  # Buffer de tiempo
 
@@ -102,10 +154,17 @@ class GraphWindow(QMainWindow):
 		self.data_buffer = [self.ch1_buff,self.ch2_buff,self.ch3_buff,self.ch4_buff,self.ch5_buff,self.ch6_buff]
 
 		colors = ['r', 'g', 'b', 'y', 'm', 'c']
-		for i in range(6):
-			curve = self.plot_widget.plot(pen=pg.mkPen(colors[i], width=2), name=f"Ch{i+1}")
-			self.curves.append(curve)
+		#for i in range(6):
+		#	curve = self.plot_widget.plot(pen=pg.mkPen(colors[i], width=2), name=f"Ch{i+1}")
+		#	self.curves.append(curve)
 
+		for i in range(3):  # canales de acelerómetro
+			curve = self.acc_plot_widget.plot(pen=pg.mkPen(colors[i], width=2), name=f"Acc{i+1}")
+			self.acc_curves.append(curve)
+
+		for i in range(3):  # canales de giroscopio
+			curve = self.gyro_plot_widget.plot(pen=pg.mkPen(colors[i+3], width=2), name=f"Gyro{i+1}")
+			self.gyro_curves.append(curve)
 
 		# Botón para detener la adquisición
 		self.stop_button = QPushButton("Detener Adquisición", self)
@@ -132,26 +191,30 @@ class GraphWindow(QMainWindow):
 		#Actualizamos los graficos
 		self.update_timer = QTimer()
 		self.update_timer.timeout.connect(self.update_plot)
-		self.update_timer.start(100)
+		self.update_timer.start(30)
 
 
 
 	def update_data(self,data):
 		""" Actualiza los gráficos con nuevos datos en tiempo real. """
-		timestamp = data[0]  # Primer valor es el tiempo
-		values = data[1:]  # Resto son valores de los canales
+		relative_time = self.sample_counter / self.sampling_rate
+		self.sample_counter += 1
+		self.time_buffer.append(relative_time)
 
-		# Desplazamiento de buffers
-		self.time_buffer.append(timestamp)
-
+		values = data[1:]  # x, y, z, wx, wy, wz
 		for i in range(6):
 			self.data_buffer[i].append(values[i])
 
 
 	def update_plot(self):
 		""" Actualiza los gráficos con nuevos datos en tiempo real. """
-		for i in range(6):
-			self.curves[i].setData(self.time_buffer, self.data_buffer[i])  # Actualizar la curva
+		#for i in range(6):
+		#	self.curves[i].setData(self.time_buffer, self.data_buffer[i])  # Actualizar la curva
+		for i in range(3):
+			self.acc_curves[i].setData(self.time_buffer, self.data_buffer[i],downsample = 5, autoDownsample = True)
+
+		for i in range(3):
+			self.gyro_curves[i].setData(self.time_buffer, self.data_buffer[i + 3])
 
 	def stop_acquisition(self):
 		""" Detiene la adquisición de datos """

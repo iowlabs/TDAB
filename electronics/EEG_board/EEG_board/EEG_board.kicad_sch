@@ -6746,10 +6746,6 @@
 		(uuid "f777f4be-98e8-44cb-ab0e-be471757dcb8")
 	)
 	(no_connect
-		(at 172.72 182.88)
-		(uuid "130418fb-2978-4629-8a4c-7ad22dd7983a")
-	)
-	(no_connect
 		(at 429.26 518.16)
 		(uuid "21473096-5011-4814-abac-0db79dde4d26")
 	)
@@ -10848,7 +10844,6 @@
 	)
 	(label "BIASOUT"
 		(at 416.56 242.57 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10859,7 +10854,6 @@
 	)
 	(label "REF_ELEC_COM"
 		(at 45.72 255.27 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10870,7 +10864,6 @@
 	)
 	(label "REF_ELEC"
 		(at 457.2 354.33 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10881,7 +10874,6 @@
 	)
 	(label "REF_ELEC_COM"
 		(at 347.98 350.52 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10892,7 +10884,6 @@
 	)
 	(label "BIASELEC"
 		(at 416.56 245.11 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10903,7 +10894,6 @@
 	)
 	(label "BIAS_ELEC_CON"
 		(at 45.72 257.81 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10914,7 +10904,6 @@
 	)
 	(label "REF_ELEC"
 		(at 360.68 350.52 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10925,7 +10914,6 @@
 	)
 	(label "VREFP"
 		(at 278.13 269.24 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10936,7 +10924,6 @@
 	)
 	(label "BIASIN"
 		(at 416.56 240.03 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10947,7 +10934,6 @@
 	)
 	(label "VREFN"
 		(at 275.59 257.81 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10958,7 +10944,6 @@
 	)
 	(label "REF_ELEC"
 		(at 392.43 350.52 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10969,7 +10954,6 @@
 	)
 	(label "BIAS_ELEC"
 		(at 273.05 349.25 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10980,7 +10964,6 @@
 	)
 	(label "BIAS_ELEC"
 		(at 242.57 351.79 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -10991,7 +10974,6 @@
 	)
 	(label "BIAS_ELEC_CON"
 		(at 231.14 351.79 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)

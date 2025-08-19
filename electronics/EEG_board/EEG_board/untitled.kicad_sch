@@ -4816,7 +4816,6 @@
 	)
 	(label "V2"
 		(at 222.25 55.88 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4827,7 +4826,6 @@
 	)
 	(label "LPF_R1_B"
 		(at 515.62 137.16 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4838,7 +4836,6 @@
 	)
 	(label "HPF_R2_A1"
 		(at 215.9 105.41 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4849,7 +4846,6 @@
 	)
 	(label "LPF_R1_B"
 		(at 515.62 144.78 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4860,7 +4856,6 @@
 	)
 	(label "LPF_R2_B"
 		(at 515.62 147.32 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4871,7 +4866,6 @@
 	)
 	(label "MG_B"
 		(at 361.95 149.86 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4882,7 +4876,6 @@
 	)
 	(label "HPF_R1_B1"
 		(at 241.3 165.1 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4893,7 +4886,6 @@
 	)
 	(label "V6"
 		(at 558.8 110.49 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4904,7 +4896,6 @@
 	)
 	(label "V3"
 		(at 299.72 107.95 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4915,7 +4906,6 @@
 	)
 	(label "HPF_R2_A1"
 		(at 241.3 172.72 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4926,7 +4916,6 @@
 	)
 	(label "HPF_R1_B1"
 		(at 228.6 91.44 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4937,7 +4926,6 @@
 	)
 	(label "V2"
 		(at 187.96 100.33 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4948,7 +4936,6 @@
 	)
 	(label "MG_A"
 		(at 293.37 105.41 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4959,7 +4946,6 @@
 	)
 	(label "V4"
 		(at 347.98 107.95 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4970,7 +4956,6 @@
 	)
 	(label "MG_B"
 		(at 336.55 107.95 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4981,7 +4966,6 @@
 	)
 	(label "V5"
 		(at 515.62 57.15 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4992,7 +4976,6 @@
 	)
 	(label "HPF_R1_A1"
 		(at 241.3 162.56 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5003,7 +4986,6 @@
 	)
 	(label "HPF_ADDR0"
 		(at 179.07 163.83 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5014,7 +4996,6 @@
 	)
 	(label "FSG_A"
 		(at 76.2 102.87 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5025,7 +5006,6 @@
 	)
 	(label "V5"
 		(at 450.85 106.68 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5036,7 +5016,6 @@
 	)
 	(label "HPF_ADDR0"
 		(at 214.63 172.72 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5047,7 +5026,6 @@
 	)
 	(label "V1"
 		(at 114.3 105.41 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5058,7 +5036,6 @@
 	)
 	(label "V3"
 		(at 236.22 55.88 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5069,7 +5046,6 @@
 	)
 	(label "HPF_R2_B1"
 		(at 241.3 175.26 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5080,7 +5056,6 @@
 	)
 	(label "V4"
 		(at 502.92 57.15 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5091,7 +5066,6 @@
 	)
 	(label "V6"
 		(at 515.62 60.96 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5102,7 +5076,6 @@
 	)
 	(label "V1"
 		(at 222.25 52.07 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5113,7 +5086,6 @@
 	)
 	(label "V2"
 		(at 236.22 52.07 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5124,7 +5096,6 @@
 	)
 	(label "HPF_ADDR1"
 		(at 182.88 163.83 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5135,7 +5106,6 @@
 	)
 	(label "LPF_R1_B"
 		(at 469.9 109.22 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5146,7 +5116,6 @@
 	)
 	(label "FSG_B"
 		(at 76.2 107.95 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5157,7 +5126,6 @@
 	)
 	(label "LPF_R2_B"
 		(at 482.6 109.22 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5168,7 +5136,6 @@
 	)
 	(label "FSG_B"
 		(at 361.95 139.7 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5179,7 +5146,6 @@
 	)
 	(label "V3"
 		(at 238.76 109.22 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5190,7 +5156,6 @@
 	)
 	(label "V6"
 		(at 514.35 111.76 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5201,7 +5166,6 @@
 	)
 	(label "MG_A"
 		(at 361.95 147.32 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5212,7 +5176,6 @@
 	)
 	(label "HPF_ADDR1"
 		(at 214.63 175.26 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5223,7 +5186,6 @@
 	)
 	(label "V5"
 		(at 502.92 60.96 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5234,7 +5196,6 @@
 	)
 	(label "V4"
 		(at 401.32 106.68 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5245,7 +5206,6 @@
 	)
 	(label "FSG_A"
 		(at 361.95 137.16 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5256,7 +5216,6 @@
 	)
 	(label "V1"
 		(at 129.54 97.79 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5267,7 +5226,6 @@
 	)
 	(label "V5"
 		(at 515.62 134.62 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5278,7 +5236,6 @@
 	)
 	(label "HPF_R1_A1"
 		(at 201.93 91.44 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5290,7 +5247,6 @@
 	(hierarchical_label "SDA"
 		(shape input)
 		(at 242.57 154.94 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5302,7 +5258,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 292.1 63.5 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5314,7 +5269,6 @@
 	(hierarchical_label "-2.5V"
 		(shape input)
 		(at 152.4 158.75 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5326,7 +5280,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 439.42 167.64 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5338,7 +5291,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 430.53 53.34 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5350,7 +5302,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 425.45 167.64 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5362,7 +5313,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 445.77 167.64 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5374,7 +5324,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 304.8 170.18 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5386,7 +5335,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 344.17 130.81 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5398,7 +5346,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 309.88 63.5 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5410,7 +5357,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 283.21 170.18 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5422,7 +5368,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 134.62 49.53 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5434,7 +5379,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 499.11 129.54 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5446,7 +5390,6 @@
 	(hierarchical_label "IN_P"
 		(shape input)
 		(at 585.47 115.57 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5458,7 +5401,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 572.77 102.87 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5470,7 +5412,6 @@
 	(hierarchical_label "CH-"
 		(shape input)
 		(at 43.18 99.06 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5482,7 +5423,6 @@
 	(hierarchical_label "+2.5V"
 		(shape input)
 		(at 146.05 158.75 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5494,7 +5434,6 @@
 	(hierarchical_label "VL"
 		(shape input)
 		(at 488.95 142.24 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5506,7 +5445,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 501.65 160.02 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5518,7 +5456,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 93.98 92.71 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5530,7 +5467,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 415.29 57.15 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5542,7 +5478,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 163.83 63.5 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5554,7 +5489,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 299.72 170.18 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5566,7 +5500,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 93.98 116.84 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5578,7 +5511,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 421.64 57.15 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5590,7 +5522,6 @@
 	(hierarchical_label "VL"
 		(shape input)
 		(at 501.65 129.54 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5602,7 +5533,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 298.45 63.5 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5614,7 +5544,6 @@
 	(hierarchical_label "VL"
 		(shape input)
 		(at 177.8 153.67 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5626,7 +5555,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 588.01 74.93 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5638,7 +5566,6 @@
 	(hierarchical_label "VL"
 		(shape input)
 		(at 331.47 144.78 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5650,7 +5577,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 419.1 167.64 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5662,7 +5588,6 @@
 	(hierarchical_label "SDA"
 		(shape bidirectional)
 		(at 332.74 139.7 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5674,7 +5599,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 346.71 162.56 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5686,7 +5610,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 163.83 45.72 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5698,7 +5621,6 @@
 	(hierarchical_label "SCL"
 		(shape input)
 		(at 242.57 157.48 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5710,7 +5632,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 576.58 74.93 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5722,7 +5643,6 @@
 	(hierarchical_label "CH+"
 		(shape input)
 		(at 43.18 111.76 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5734,7 +5654,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 322.58 105.41 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5746,7 +5665,6 @@
 	(hierarchical_label "+2.5V"
 		(shape input)
 		(at 133.35 158.75 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5758,7 +5676,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 302.26 110.49 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5770,7 +5687,6 @@
 	(hierarchical_label "-2.5V"
 		(shape input)
 		(at 218.44 157.48 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5782,7 +5698,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 402.59 57.15 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5794,7 +5709,6 @@
 	(hierarchical_label "-2.5V"
 		(shape input)
 		(at 139.7 158.75 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5806,7 +5720,6 @@
 	(hierarchical_label "VL"
 		(shape input)
 		(at 218.44 161.29 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5818,7 +5731,6 @@
 	(hierarchical_label "VL"
 		(shape input)
 		(at 346.71 130.81 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5830,7 +5742,6 @@
 	(hierarchical_label "+5V"
 		(shape input)
 		(at 88.9 54.61 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5842,7 +5753,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 110.49 53.34 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5854,7 +5764,6 @@
 	(hierarchical_label "VL"
 		(shape input)
 		(at 321.31 149.86 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5866,7 +5775,6 @@
 	(hierarchical_label "+2.5V"
 		(shape input)
 		(at 218.44 154.94 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5878,7 +5786,6 @@
 	(hierarchical_label "SCL"
 		(shape input)
 		(at 487.68 134.62 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5890,7 +5797,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 572.77 124.46 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5902,7 +5808,6 @@
 	(hierarchical_label "SDA"
 		(shape bidirectional)
 		(at 487.68 137.16 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5914,7 +5819,6 @@
 	(hierarchical_label "IN_N"
 		(shape input)
 		(at 585.47 110.49 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5926,7 +5830,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 430.53 68.58 270)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5938,7 +5841,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 316.23 63.5 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5950,7 +5852,6 @@
 	(hierarchical_label "SCL"
 		(shape input)
 		(at 332.74 137.16 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5962,7 +5863,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 408.94 57.15 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5974,7 +5874,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 148.59 49.53 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5986,7 +5885,6 @@
 	(hierarchical_label "-5V"
 		(shape input)
 		(at 288.29 170.18 90)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
