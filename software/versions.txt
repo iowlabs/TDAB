@@ -1,0 +1,17 @@
+Firmware
+
+	- main_v1_ino.
+		- test dummy sin signals to valid channel
+			-	1 24 bits signal for simulate ADC single channel
+	    	-   6 16 bits signal for simulate Accelerometers signals
+		- send data to 5k
+		- use cdc native usb
+		- send data with write function in raw mode.
+
+
+software
+
+	-plot_real_time_data.py
+		- test to match with the main_v1_ino.
+			- plot all 7 signal recived.
+			- 

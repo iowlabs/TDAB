@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #define SAMPLE_RATE 5000
-#define TABLE_SIZE 100
+#define TABLE_SIZE 00
 #define END_MARKER 0xFF  // marcador de fin de paquete
 
 int16_t sine2k_1[TABLE_SIZE];
