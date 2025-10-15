@@ -57,13 +57,13 @@ FRAME_SIZE = 23
 PAYLOAD_SIZE = FRAME_SIZE - 2  # after header
 
 # Si tus nombres de widgets fueran distintos, cambia aquí:
-OBJ_GRAPH_ADC = "graphicsView_11"
+OBJ_GRAPH_ADC = "graphicsView_9"
 OBJ_GRAPH_ACC = "graphicsView_10"
 OBJ_BTN_START = "pushButton_36"
 OBJ_BTN_STOP  = "pushButton_9"
 OBJ_CB_ACC1   = "checkBox"
 OBJ_CB_ACC2   = "checkBox_2"
-OBJ_CBS_ADC   = ["checkBox_18", "checkBox_19", "checkBox_20", "checkBox_21", "checkBox_22", "checkBox_23"]
+OBJ_CBS_ADC   = ["checkBox_3", "checkBox_7", "checkBox_4", "checkBox_6", "checkBox_5", "checkBox_8"]
 
 
 
@@ -96,9 +96,7 @@ OFFSET_ADC = 12000.0   # p.ej. ±10k -> pon 12000
 OFFSET_ACC = 12000.0   # idem para acelerómetros
 
 # escala del canal 24b para verse como 16b (si lo sigues usando en CH1)
-#SCALE_ADC24 = 1.0/256.0
-SCALE_ADC24 = 1.0/1.0
-
+SCALE_ADC24 = 1.0/256.0
 
 # --------------------------------------------------------------
 
@@ -768,6 +766,13 @@ class App(QtWidgets.QMainWindow):
         t_win = t[i0:]
         y_win = ch[:, i0:]      # ch[0]=ADC24 (sintético por ahora), ch[1:]=6 ejes ACC
 
+        # --- recorte a ventana visible ---
+        t_end = t[-1]
+        t_start = max(0.0, t_end - WINDOW_SECS)
+        i0 = np.searchsorted(t, t_start, side='left')
+        t_win = t[i0:]
+        y_win = ch[:, i0:]      # ch[0]=ADC24 (sintético por ahora), ch[1:]=6 ejes ACC
+
 
         # decimación simple para rendimiento
         N = t_win.size
@@ -777,39 +782,16 @@ class App(QtWidgets.QMainWindow):
         t_d = t_win[::step]
         y_d = y_win[:, ::step]
 
-
-        # ------------- ACELERÓMETROS -------------
-        # Map: ch[1:4] -> A1 X/Y/Z; ch[4:7] -> A2 X/Y/Z
-        acc_raw = np.vstack([y_d[1, :], y_d[2, :], y_d[3, :], y_d[4, :], y_d[5, :], y_d[6, :]])
-        acc_plot_data = self._stack_rows(acc_raw, OFFSET_ACC) if STACK_ACC else acc_raw
-        # ticks del eje
-        self._set_axis_ticks(self.acc_plot, OFFSET_ACC if STACK_ACC else 0.0, self.acc_names)
-
-        # enviar a curvas
-        for i in range(6):
-            self.acc_curves[i].setData(t_d, acc_plot_data[i, :], _callSync='off')
-
-        # ------------- ADC -------------
-        # Hoy sólo dibujamos CH1 con el 24b (escala para que se vea como 16b). CH2..6 quedan listos.
-        adc_raw = np.zeros((6, t_d.size), dtype=np.float32)
-        adc_raw[0, :] = y_d[0, :] * SCALE_ADC24  # CH1 <- canal 24b escalado
-        adc_plot_data = self._stack_rows(adc_raw, OFFSET_ADC) if STACK_ADC else adc_raw
-        self._set_axis_ticks(self.adc_plot, OFFSET_ADC if STACK_ADC else 0.0, self.adc_names)
-
-        for i in range(6):
-            self.adc_curves[i].setData(t_d, adc_plot_data[i, :], _callSync='off')
-
-
-        # # ----- Acelerómetros: ch[1:4] A1 xyz, ch[4:7] A2 xyz -----
-        # for i in range(3):
-        #     self.acc_curves[i].setData(t_d, y_d[i+1, :], _callSync='off')
-        # for i in range(3):
-        #     self.acc_curves[i+3].setData(t_d, y_d[i+4, :], _callSync='off')
+        # ----- Acelerómetros: ch[1:4] A1 xyz, ch[4:7] A2 xyz -----
+        for i in range(3):
+            self.acc_curves[i].setData(t_d, y_d[i+1, :], _callSync='off')
+        for i in range(3):
+            self.acc_curves[i+3].setData(t_d, y_d[i+4, :], _callSync='off')
 
         # ----- ADC: hoy sólo tenemos un canal sintético de 24 b en ch[0] -----
         # Escalar 24 b a ~16 b para vista
-        #adc0 = y_d[0, :] * (1.0/1.0)
-        #self.adc_curves[0].setData(t_d, adc0, _callSync='off')
+        adc0 = y_d[0, :] * (1.0/1.0)
+        self.adc_curves[0].setData(t_d, adc0, _callSync='off')
 
         # CH2..CH6 quedan listos para mapear ADS1299 reales cuando estén:
         # self.adc_curves[1].setData(t_d, adc_ch2, ...)
