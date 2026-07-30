@@ -1,6 +1,8 @@
 #include <Arduino.h>
+#include <Wire.h>
 #include <IntervalTimer.h>
 #include <ArduinoJson.h>
+#include <MPU9250_WE.h>
 
 
 // ======================== CONFIGURACIÓN ========================
@@ -40,6 +42,12 @@ static_assert((TX_QUEUE_LEN & (TX_QUEUE_LEN - 1)) == 0, "TX_QUEUE_LEN must be po
 // Lote máximo a escribir por iteración (controla monopolio de CPU)
 #define MAX_FRAMES_PER_ITER 32
 
+
+
+// =================== MPU9250 ====================
+MPU9250_WE imu1 = MPU9250_WE(&Wire1,0x68);
+MPU9250_WE imu2 = MPU9250_WE(&Wire1,0x69);
+bool imu1_ok = false, imu2_ok = false;
 
 // ========================== ESTADOS / CONTROL =======================
 
@@ -120,11 +128,33 @@ if (g_state != RUNNING) return;
   }
 
   // 6× ACC16 (int16 LE)
-  for (int i=0;i<NUM_ACC16;++i) {
-    int16_t s = (int16_t)lrintf(AMP_16B * sine_table[(int)ph_acc16[i]]);
-    f[off+0] = (uint8_t)(s & 0xFF);
-    f[off+1] = (uint8_t)((s>>8) & 0xFF);
-    off += 2;
+  // Leer cada muestra (o cada N si quieres aligerar)
+  //if (imu1_ok && (sample_id % 5 == 0)) imu1.readSensor();
+  //if (imu2_ok && (sample_id % 5 == 0)) imu2.readSensor();
+
+  for (int i=0;i<NUM_ACC16;i++) {
+    int16_t s = 0;
+
+    if (imu1_ok && i < 3) {
+      auto g=imu1.getGValues();
+      if (i==0) s = (int16_t)(g.x*10000);
+      if (i==1) s = (int16_t)(g.y*10000);
+      if (i==2) s = (int16_t)(g.z*10000);
+    }
+    else if (imu2_ok && i >=3 && i<6) {
+      auto g=imu2.getGValues();
+      if (i==3) s = (int16_t)(g.x*10000);
+      if (i==4) s = (int16_t)(g.y*10000);
+      if (i==5) s = (int16_t)(g.z*10000);
+    }
+    else {
+      // Dummy
+      s = (int16_t)lrintf(AMP_16B * sine_table[(int)ph_acc16[i]]);
+    }
+
+    f[off+0]=(uint8_t)(s & 0xFF);
+    f[off+1]=(uint8_t)((s>>8)&0xFF);
+    off+=2;
   }
 
   // CRC16
@@ -223,7 +253,7 @@ static void handle_cmd_line(const char* line) {
   send_json_reply(rep);
 }
 
-static void poll_serial_commands() 
+static void poll_serial_commands()
 {
   while (Serial.available() > 0) {
     char c = (char)Serial.read();
@@ -257,6 +287,17 @@ void setup() {
   }
 
   update_phase_steps();
+ Wire1.begin();
+ Wire1.setClock(400000);
+
+  if (imu1.init()) { imu1_ok = true; imu1.autoOffsets(); }
+  if (imu2.init()) { imu2_ok = true; imu2.autoOffsets(); }
+
+  Serial.println("starting");
+
+  if (imu1_ok) Serial.println("IMU1 detectada en 0x68");
+  if (imu2_ok) Serial.println("IMU2 detectada en 0x69");
+
 
   // Timer a 5 kHz
   sampler.begin(isr_sample, 1000000.0f / SAMPLE_RATE_HZ);

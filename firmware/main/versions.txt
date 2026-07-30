@@ -1,0 +1,10 @@
+V1:
+	- send simulated signals 6 chanels of 24 bits each for ADC and 6 channels of 16 bits for ACC.
+	- Frame length:  2 + 4 + 6*3 + 6*2 + 2 = 38
+	- Response to cmd:
+		-	start.
+ 		- 	stop
+ 		- set
+		- state?
+V2:
+	-read signal from ACC 

@@ -18,7 +18,9 @@ Notas:
 """
 import argparse
 import sys
+import os
 import json
+import csv,queue
 import numpy as np
 import serial  # pyserial
 
@@ -53,7 +55,7 @@ PAUSED = 2
 
 
 HEADER = b'\xA5\x5A'
-FRAME_SIZE = 23
+FRAME_SIZE = 38
 PAYLOAD_SIZE = FRAME_SIZE - 2  # after header
 
 # Si tus nombres de widgets fueran distintos, cambia aquí:
@@ -134,13 +136,15 @@ class SerialReader(threading.Thread):
         self.verify_crc = verify_crc
         self.stop_flag = threading.Event()
         self.connected = threading.Event()
+        self.on_frame = None
+
         self.lost = 0
         self._last_sid = None
         # Preallocate ring buffers (time and 7 channels)
         self.rate = float(rate)
         self.buf_len = int(buf_seconds * self.rate)
         self.t = np.full(self.buf_len, np.nan, dtype=np.float64)
-        self.ch = np.full((7, self.buf_len), np.nan, dtype=np.float32)
+        self.ch = np.full((12, self.buf_len), np.nan, dtype=np.float32)
         self.idx = 0
         self.wraps = 0
         self.lock = threading.Lock()
@@ -198,43 +202,67 @@ class SerialReader(threading.Thread):
         while not self.stop_flag.is_set():
             if not self._sync_to_header():
                 break
-            # Read 21 bytes of payload after header
-            payload = self._read_exact(PAYLOAD_SIZE)
+
+            payload = self._read_exact(PAYLOAD_SIZE)  # 36 bytes after header
             if len(payload) != PAYLOAD_SIZE:
-                # Lost sync or timeout; restart sync
-                continue
+                continue  # timeout o desalineación
 
-            # Parse fields
+            # -------- Parse --------
             sid = struct.unpack_from('<I', payload, 0)[0]
-            # s24 little-endian at offset 4..6
-            s24 = s24_from_le(payload[4], payload[5], payload[6])
-            acc = struct.unpack_from('<6h', payload, 7)  # int16 * 6
-            crc_rx = struct.unpack_from('>H', payload, 19)[0]  # big-endian at last two bytes
 
-            if self._last_sid is not None and sid != (self._last_sid + 1) % (1<<32):
-                self.lost += (sid - self._last_sid - 1) % (1<<32)
-                self._last_sid = sid
+            # 6 × s24 LE a partir de offset 4 (4..21)
+            adc24 = []
+            off = 4
+            for _ in range(6):
+                s = s24_from_le(payload[off+0], payload[off+1], payload[off+2])
+                adc24.append(s)
+                off += 3
 
+            # 6 × int16 LE en 22..33
+            acc = struct.unpack_from('<6h', payload, 22)
+
+            # CRC16-CCITT al final del payload (34..35, big-endian)
+            crc_rx = struct.unpack_from('>H', payload, 34)[0]
             if self.verify_crc:
                 crc_calc = crc16_ccitt(HEADER + payload[:-2])
                 if crc_calc != crc_rx:
-                    # Bad CRC: drop and resync
+                    # frame inválido: NO actualices last_sid ni lost; resincroniza en el próximo header
                     continue
 
-            # Build timestamps from sample_id to keep perfect time base
+            # -------- Contador de pérdidas --------
+            if self._last_sid is not None:
+                expected = (self._last_sid + 1) & 0xFFFFFFFF
+                if sid != expected:
+                    # cuántos frames faltaron (módulo 2^32)
+                    self.lost += (sid - expected) & 0xFFFFFFFF
+
+            self._last_sid = sid  # actualizar siempre tras pasar CRC
+
+            # -------- Timestamp y almacenamiento --------
             t = sid / self.rate
 
-            # Store into ring buffer
+            if self.on_frame is not None:
+                # 'raw' = trama completa tal como llega (header+payload)
+                raw = HEADER + payload
+                # Pasa listas simples para que no dependan de NumPy
+                try:
+                    self.on_frame(sid, t, adc24, acc, raw)
+                except Exception:
+                    # No derribar el hilo si el callback falla
+                    pass
+
             with self.lock:
                 i = self.idx
                 self.t[i] = t
-                # channels: 0 = s24, 1..6 = acc
-                self.ch[0, i] = float(s24)  # raw units
+                # Guarda los 12 canales: 0..5 = ADC24, 6..11 = ACC
+                # Asegúrate que self.ch tenga forma (12, buf_len)
                 for k in range(6):
-                    self.ch[k+1, i] = float(acc[k])
+                    self.ch[k,   i] = float(adc24[k])
+                    self.ch[k+6, i] = float(acc[k])
                 self.idx = (i + 1) % self.buf_len
                 if self.idx == 0:
                     self.wraps += 1
+
 
     def get_snapshot(self):
         """Return a chronological snapshot: time and 7×N data, already ordered."""
@@ -286,7 +314,11 @@ class App(QtWidgets.QMainWindow):
 
         self.state = IDLE
         self.elapsed_time = 0
-        
+
+
+
+
+
         self.enable_ch		= [ 0, 0, 0, 0, 0, 0, 0, 0]
         self.bfc 	= [ EEG_BFC, EEG_BFC, EEG_BFC, EEG_BFC, EEG_BFC, EEG_BFC ]
         self.tfc 	= [ EEG_TFC, EEG_TFC, EEG_TFC, EEG_TFC, EEG_TFC, EEG_TFC ]
@@ -295,7 +327,7 @@ class App(QtWidgets.QMainWindow):
         self.mode_ch = [ 0, 0, 0, 0, 0, 0] # 0 test; 1 impedance
         self.test_mode_ch = ['EEG','EEG','EEG','EEG','EEG','EEG']
 
-        
+
         self.ui.lineEdit_2.isReadOnly()
         self.ui.lineEdit_3.isReadOnly()
 
@@ -375,7 +407,7 @@ class App(QtWidgets.QMainWindow):
             self.tfc_lines[i].setDisabled(True)
             self.gain_lines[i].setDisabled(True)
 
-        
+
         self.ui.pushButton_9.setDisabled(True)
         self.ui.pushButton_35.setDisabled(True)
         self.ui.pushButton_32.setDisabled(True)
@@ -403,7 +435,7 @@ class App(QtWidgets.QMainWindow):
         # ---- Timer para actualizar hora y tiempo transcurrido ----
         #TIME
         self.date_now = QtCore.QDate.currentDate()
-		
+
         #MGMT OF TIME
         self.clock_timer = QtCore.QTimer()
         self.clock_timer.setInterval(1000)
@@ -416,6 +448,20 @@ class App(QtWidgets.QMainWindow):
 
         # ---- Señales/slots ----
         self._connect_signals()
+
+
+        # --- Estado de logging ---
+        self.log_mode = 'bin'      # 'bin' (recomendado) o 'csv'
+        self.log_dir = './data'
+        self.log_queue = queue.Queue(maxsize=10000)  # cola amplia (frames)
+        self.log_thread = None
+        self.log_stop = threading.Event()
+        self.log_file = None       # handle abierto
+        self._run_start_ts = None  # timestamp de inicio de prueba (para nombre de archivo)
+
+        # engancha callback del reader para recibir frames validados (CRC OK)
+        self.reader.on_frame = self._on_frame_for_logging
+
 
         # ---- Timer GUI ----
         self.timer = QtCore.QTimer(self)
@@ -431,6 +477,7 @@ class App(QtWidgets.QMainWindow):
         self.adc_plot.setLabel('bottom', 'Time', units='s')
         self.adc_plot.showGrid(x=True, y=True, alpha=0.3)
         self.adc_plot.addLegend()
+        self.adc_names = [f"CH{i+1}" for i in range(6)]
         self.adc_curves = [self.adc_plot.plot(name=f"CH{i+1}") for i in range(6)]
 
         # ACC (6 curvas: A1 xyz, A2 xyz)
@@ -439,16 +486,15 @@ class App(QtWidgets.QMainWindow):
         self.acc_plot.addLegend()
         self.acc_names = ["A1-X", "A1-Y", "A1-Z", "A2-X", "A2-Y", "A2-Z"]
         self.acc_curves = [self.acc_plot.plot(name=nm) for nm in self.acc_names]
-        
-        self.adc_names = [f"CH{i+1}" for i in range(6)]     
-        self.adc_curves = [self.adc_plot.plot(name=nm) for nm in self.adc_names]
-       
+
+
+
 
     # --------------- Conexión señales ---------------
     def _connect_signals(self):
         # Botones Start/Stop -> JSON
-        self.btn_start.clicked.connect(lambda: self.send_cmd({"cmd": "start"}))
-        self.btn_stop.clicked.connect(lambda: self.send_cmd({"cmd": "stop"}))
+        self.btn_start.clicked.connect(self.startSample)
+        self.btn_stop.clicked.connect(self.stopSample)
 
         # Checkboxes
         self.cb_acc1.stateChanged.connect(self._update_visibility)
@@ -462,7 +508,7 @@ class App(QtWidgets.QMainWindow):
         self.enchannels_checks[3].stateChanged.connect(lambda:self.enableChannel(3))
         self.enchannels_checks[4].stateChanged.connect(lambda:self.enableChannel(4))
         self.enchannels_checks[5].stateChanged.connect(lambda:self.enableChannel(5))
-	
+
         self.ui.checkBox_12.stateChanged.connect(lambda:self.enableAltChannel(6))
         self.ui.checkBox_15.stateChanged.connect(lambda:self.enableAltChannel(7))
         self.ui.checkBox_17.stateChanged.connect(self.enableAllChannel)
@@ -524,7 +570,129 @@ class App(QtWidgets.QMainWindow):
         for i, cb in enumerate(self.cb_adc):
             self.adc_curves[i].setVisible(cb.isChecked())
 
+
+
+	# --------------- logged functions ------------
+    def _timestamp_for_filename(self):
+        return datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    def _ensure_log_dir(self):
+        os.makedirs(self.log_dir, exist_ok=True)
+
+    def _open_log_file(self):
+        self._ensure_log_dir()
+        ts = self._timestamp_for_filename()
+        self._run_start_ts = ts
+        if self.log_mode == 'bin':
+            path = os.path.join(self.log_dir, f"{ts}.bin")
+            self.log_file = open(path, "wb", buffering=1024*1024)  # buffer grande
+            self.statusBar().showMessage(f"Logging BIN → {path}")
+        else:
+            path = os.path.join(self.log_dir, f"{ts}.csv")
+            self.log_file = open(path, "w", newline='', buffering=1024*1024)
+            self._csv_writer = csv.writer(self.log_file)
+            # cabecera CSV
+            self._csv_writer.writerow(
+                ["sid","t","adc1","adc2","adc3","adc4","adc5","adc6","ax1","ay1","az1","ax2","ay2","az2"]
+            )
+            self.statusBar().showMessage(f"Logging CSV → {path}")
+
+    def _close_log_file(self):
+        try:
+            if self.log_file:
+                self.log_file.flush()
+                self.log_file.close()
+        except Exception:
+            pass
+        self.log_file = None
+
+    def _log_worker(self):
+        """Hilo escritor: drena la cola y escribe en disco."""
+        try:
+            while not self.log_stop.is_set():
+                try:
+                    item = self.log_queue.get(timeout=0.2)  # (mode, data)
+                except queue.Empty:
+                    continue
+
+                mode, data = item
+                if mode == 'bin':
+                    # data = raw bytes
+                    self.log_file.write(data)
+                elif mode == 'csv':
+                    # data = tuple(sid, t, adc6, acc6)
+                    sid, tt, adc6, acc6 = data
+                    self._csv_writer.writerow([sid, f"{tt:.9f}"] + list(adc6) + list(acc6))
+                # permitir que el SO vacíe buffers sin bloquear hilo de GUI
+                # (flushea cada tanto; no en cada línea)
+        except Exception as e:
+            # no reventar la app por error del logger
+            pass
+
+    def _start_logging(self):
+        """Abrir archivo y lanzar hilo escritor."""
+        self.log_stop.clear()
+        self._open_log_file()
+        self.log_thread = threading.Thread(target=self._log_worker, daemon=True)
+        self.log_thread.start()
+
+    def _stop_logging(self):
+        """Cerrar hilo y archivo."""
+        self.log_stop.set()
+        # vaciar cola pendiente
+        while not self.log_queue.empty():
+            try:
+                item = self.log_queue.get_nowait()
+                mode, data = item
+                if mode == 'bin':
+                    self.log_file.write(data)
+                else:
+                    sid, tt, adc6, acc6 = data
+                    self._csv_writer.writerow([sid, f"{tt:.9f}"] + list(adc6) + list(acc6))
+            except Exception:
+                break
+        self._close_log_file()
+        self.log_thread = None
+
+    def _on_frame_for_logging(self, sid, t, adc24_list, acc_list, raw_bytes):
+        """
+        Callback invocada desde el hilo lector (reader).
+        Encola datos para que el hilo escritor los procese (no bloquear el lector).
+        """
+        if self.state != RUNNING:
+            return
+        try:
+            if self.log_mode == 'bin':
+                # guardar tal cual llega (header+payload)
+                self.log_queue.put_nowait(('bin', raw_bytes))
+            else:
+                # CSV: guardar valores parseados
+                # adc24_list: 6 enteros (24-bit en int32), acc_list: 6 int16
+                self.log_queue.put_nowait(('csv', (sid, t, tuple(adc24_list), tuple(acc_list))))
+        except queue.Full:
+            # En caso extremo de que la cola se llene, descartamos (para no frenar la adquisición)
+            pass
+
+    def _clear_reader_buffers_and_plots(self):
+        """Resetear ring buffer y limpiar plots al iniciar una prueba."""
+        # 1) Reset de buffers del reader
+        with self.reader.lock:
+            self.reader.idx = 0
+            self.reader.wraps = 0
+            self.reader.lost = 0
+            self.reader._last_sid = None
+            self.reader.t[:] = np.nan
+            self.reader.ch[:] = np.nan
+        # 2) Limpiar las curvas
+        for c in self.adc_curves:
+            c.setData([], [])
+        for c in self.acc_curves:
+            c.setData([], [])
+
+
+
     # --------------- Used functions ---------------
+
     def updateTime(self):
         if self.state == RUNNING:
             self.elapsed_time += 1
@@ -532,6 +700,26 @@ class App(QtWidgets.QMainWindow):
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
         self.ui.lineEdit_2.setText(current_time)
+
+    def startSample(self):
+        self._clear_reader_buffers_and_plots()
+
+        self.log_mod = 'bin'
+        self._start_logging()
+
+        self.send_cmd({"cmd": "start"})
+        self.state = RUNNING
+        self.btn_start.setDisabled(True)
+        self.btn_stop.setDisabled(False)
+        self.statusBar().showMessage("RUNNING + logging...")
+
+    def stopSample(self):
+        self.send_cmd({"cmd": "stop"})
+        self.state = IDLE
+        self.btn_start.setDisabled(False)
+        self.btn_stop.setDisabled(True)
+        self._stop_logging()
+        self.statusBar().showMessage("STOPPED; logging saved.")
 
     def enableChannel(self, _ch):
         if self.enchannels_checks[_ch].isChecked():
@@ -751,6 +939,33 @@ class App(QtWidgets.QMainWindow):
             self.statusBar().showMessage(f"Error al enviar comando: {e}")
 
     # --------------- Actualización periódica de plots ---------------
+    def _stack_rows(self, Y: np.ndarray, offset: float) -> np.ndarray:
+        """
+        Devuelve una copia apilada: fila i -> y[i] + i*offset
+        """
+        if not offset:
+            return Y
+        Z = Y.copy()
+        rows = Z.shape[0]
+        for i in range(rows):
+            Z[i, :] += i * float(offset)
+        return Z
+
+    def _set_axis_ticks(self, plot_widget, offset: float, names: list):
+        """
+        Coloca etiquetas en el eje Y en los niveles i*offset.
+        Aunque un canal esté oculto, mantenemos su tick para evitar saltos.
+        """
+        ax = plot_widget.getAxis('left')
+        if not offset:
+            # sin offset: no forcemos ticks personalizados
+            ax.setTicks(None)
+            return
+        ticks = [(i*float(offset), names[i]) for i in range(len(names))]
+        # setTicks recibe una lista de “niveles”; pasamos uno
+        ax.setTicks([ticks])
+
+
     def _on_timer(self):
 
         #update time
@@ -778,27 +993,19 @@ class App(QtWidgets.QMainWindow):
         y_d = y_win[:, ::step]
 
 
-        # ------------- ACELERÓMETROS -------------
-        # Map: ch[1:4] -> A1 X/Y/Z; ch[4:7] -> A2 X/Y/Z
-        acc_raw = np.vstack([y_d[1, :], y_d[2, :], y_d[3, :], y_d[4, :], y_d[5, :], y_d[6, :]])
-        acc_plot_data = self._stack_rows(acc_raw, OFFSET_ACC) if STACK_ACC else acc_raw
-        # ticks del eje
+        # ----- ACC: 6 filas (6..11) -----
+        acc_raw = y_d[6:12, :]
+        acc_plot = self._stack_rows(acc_raw, OFFSET_ACC) if STACK_ACC else acc_raw
         self._set_axis_ticks(self.acc_plot, OFFSET_ACC if STACK_ACC else 0.0, self.acc_names)
-
-        # enviar a curvas
         for i in range(6):
-            self.acc_curves[i].setData(t_d, acc_plot_data[i, :], _callSync='off')
+            self.acc_curves[i].setData(t_d, acc_plot[i, :], _callSync='off')
 
-        # ------------- ADC -------------
-        # Hoy sólo dibujamos CH1 con el 24b (escala para que se vea como 16b). CH2..6 quedan listos.
-        adc_raw = np.zeros((6, t_d.size), dtype=np.float32)
-        adc_raw[0, :] = y_d[0, :] * SCALE_ADC24  # CH1 <- canal 24b escalado
-        adc_plot_data = self._stack_rows(adc_raw, OFFSET_ADC) if STACK_ADC else adc_raw
+        # ----- ADC: 6 filas (0..5) -----
+        adc_raw = y_d[0:6, :] * float(SCALE_ADC24)
+        adc_plot = self._stack_rows(adc_raw, OFFSET_ADC) if STACK_ADC else adc_raw
         self._set_axis_ticks(self.adc_plot, OFFSET_ADC if STACK_ADC else 0.0, self.adc_names)
-
         for i in range(6):
-            self.adc_curves[i].setData(t_d, adc_plot_data[i, :], _callSync='off')
-
+            self.adc_curves[i].setData(t_d, adc_plot[i, :], _callSync='off')
 
         # # ----- Acelerómetros: ch[1:4] A1 xyz, ch[4:7] A2 xyz -----
         # for i in range(3):
@@ -820,31 +1027,7 @@ class App(QtWidgets.QMainWindow):
             f"samples={N}  fs={self.reader.rate:.0f} Hz  lost={self.reader.lost}"
         )
 
-    def _stack_rows(self, y2d: np.ndarray, offset: float) -> np.ndarray:
-        """
-        Devuelve una copia apilada: fila i -> y[i] + i*offset
-        """
-        if offset == 0.0:
-            return y2d
-        Y = y2d.copy()
-        rows = Y.shape[0]
-        for i in range(rows):
-            Y[i, :] += i * float(offset)
-        return Y
 
-    def _set_axis_ticks(self, plot_widget, offset: float, names: list):
-        """
-        Coloca etiquetas en el eje Y en los niveles i*offset.
-        Aunque un canal esté oculto, mantenemos su tick para evitar saltos.
-        """
-        ax = plot_widget.getAxis('left')
-        if not offset:
-            # sin offset: no forcemos ticks personalizados
-            ax.setTicks(None)
-            return
-        ticks = [(i*float(offset), names[i]) for i in range(len(names))]
-        # setTicks recibe una lista de “niveles”; pasamos uno
-        ax.setTicks([ticks])
 
 
     def closeEvent(self, ev):
